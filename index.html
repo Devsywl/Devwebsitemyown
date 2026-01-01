@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Kamu</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
+        body {
+            background-color: #000;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .card {
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            padding: 20px;
+        }
+
+        /* --- Bagian Gambar --- */
+        .image-box {
+            width: 250px;
+            height: 250px;
+            background-color: #888;
+            border: 4px solid #4cdbf1;
+            border-radius: 20px;
+            margin: 0 auto 20px auto;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 20px rgba(76, 219, 241, 0.3);
+        }
+
+        .image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: transform 0.5s ease-in-out, opacity 0.5s ease;
+        }
+
+        /* Animasi Slide */
+        .slide-out { transform: translateX(-100%) scale(0.8); opacity: 0; }
+        .slide-in { animation: comeFromBack 0.5s forwards; }
+
+        @keyframes comeFromBack {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* --- Bagian Teks Soal --- */
+        .question-box {
+            background-color: #8a2be2;
+            padding: 15px 20px;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .question-text {
+            font-weight: 800;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        /* --- Bagian Tombol --- */
+        .button-group {
+            position: relative;
+            /* UBAH: Tinggi diperbesar dari 100px ke 150px agar area lari lebih jauh */
+            height: 200px; 
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s, top 0.2s ease, left 0.2s ease; /* Tambah transisi gerak */
+            color: white;
+            position: absolute;
+            width: 140px;
+            top: 20px; 
+        }
+
+        .btn-yes {
+            background-color: #76c745;
+            box-shadow: 0 4px 0 #4ca32d;
+            left: 10px; /* Kiri */
+            z-index: 1; 
+        }
+        
+        .btn-no {
+            background-color: #ff4d4d;
+            box-shadow: 0 4px 0 #cc0000;
+            right: 10px; /* Kanan */
+            z-index: 100; /* Selalu di atas */
+        }
+
+        .btn:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .btn:hover { filter: brightness(1.1); }
+
+        .buttons-locked {
+            pointer-events: none;
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        /* --- Popup Jawaban Akhir --- */
+        .final-popup {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 999;
+        }
+
+        .final-content {
+            background: white;
+            color: black;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.5s ease;
+            position: relative;
+            width: 80%;
+            max-width: 300px;
+        }
+
+        .final-content h1 {
+            color: #8a2be2;
+            font-size: 1.8rem;
+            margin-top: 20px;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 30px; font-weight: bold;
+            color: #aaa; cursor: pointer;
+        }
+        
+        .close-btn:hover { color: #f00; }
+
+        .show-popup { opacity: 1; pointer-events: auto; }
+        .show-popup .final-content { transform: scale(1); }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="image-box">
+            <img id="mainImage" src="https://via.placeholder.com/250/333/fff?text=Image+1" alt="Ilustrasi">
+        </div>
+
+        <div class="question-box">
+            <p id="questionText" class="question-text">Loading...</p>
+        </div>
+
+        <div class="button-group" id="btnGroup">
+            <button id="btnYes" class="btn btn-yes" onclick="nextQuestion()">YES</button>
+            <button id="btnNo" class="btn btn-no" onmouseover="moveButton(this)" onclick="handleNoClick()">NO</button>
+        </div>
+    </div>
+
+    <div id="finalPopup" class="final-popup">
+        <div class="final-content">
+            <span class="close-btn" onclick="closePopup()">&times;</span>
+            <h1 id="finalText">Iya aku juga ❤️</h1>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                text: "Anu...Aku mao ngomong boleh gak?",
+                yes: "Bolehh",
+                no: "GAK",
+                img: "https://i.pinimg.com/736x/95/5d/27/955d27da511941682ebcb828caea03f7.jpg" 
+            },
+            {
+                text: "Aku bukan orang yang jago ngomong, tapi jujur itu penting kan?",
+                yes: "Iyaa",
+                no: "GAK PENTING",
+                img: "https://i.pinimg.com/736x/8d/ec/b8/8decb8abf4aa211f0f2dc6f18465f86a.jpg"
+            },
+            {
+                text: "Kamu Tau aku gak?",
+                yes: "Tau",
+                no: "Gatau",
+                img: "https://i.pinimg.com/736x/cc/30/7f/cc307fac641b8a25bcbfa492c39f07a0.jpg"
+            },
+            {
+                text: "Bagaimana jika kita...",
+                yes: "Jika Apa?",
+                no: "Gak",
+                img: "https://i.pinimg.com/736x/f5/c7/0c/f5c70cf00add39ea695629c14f71b177.jpg"
+            },
+            {
+                text: "Saling menerima?",
+                yes: "Terima",
+                no: "Gak terima",
+                img: "https://i.pinimg.com/736x/3f/9b/f3/3f9bf364454416f0de03157c41b64b89.jpg"
+            }
+        ];
+
+        let currentStep = 0;
+        const imgEl = document.getElementById('mainImage');
+        const qTextEl = document.getElementById('questionText');
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+        const popup = document.getElementById('finalPopup');
+        const finalText = document.getElementById('finalText');
+        const btnGroup = document.getElementById('btnGroup');
+
+        function init() {
+            updateUI();
+        }
+
+        function updateUI() {
+            const data = questions[currentStep];
+            
+            qTextEl.innerText = data.text;
+            btnYes.innerText = data.yes;
+            btnNo.innerText = data.no;
+
+            // Reset posisi NO ke awal
+            btnNo.style.left = 'auto'; 
+            btnNo.style.top = '20px';
+            btnNo.style.right = '10px';
+            
+            imgEl.classList.add('slide-out');
+            setTimeout(() => {
+                imgEl.src = data.img;
+                imgEl.classList.remove('slide-out');
+                imgEl.classList.add('slide-in');
+                setTimeout(() => imgEl.classList.remove('slide-in'), 500);
+            }, 500);
+        }
+
+        function nextQuestion() {
+            if (currentStep < questions.length - 1) {
+                currentStep++;
+                updateUI();
+            } else {
+                showFinalResult(true);
+            }
+        }
+
+        function handleNoClick() {
+            if (currentStep === questions.length - 1) {
+                showFinalResult(false);
+            } else {
+                moveButton(btnNo);
+            }
+        }
+
+        function moveButton(btn) {
+            if (currentStep === questions.length - 1) return;
+
+            const containerRect = btnGroup.getBoundingClientRect();
+            const btnRect = btn.getBoundingClientRect();
+
+            const maxW = containerRect.width - btnRect.width;
+            const maxH = containerRect.height - btnRect.height;
+            const minX = containerRect.width / 2; // Batas tengah (untuk sisi kanan)
+
+            // Posisi tombol saat ini (perkiraan)
+            // Jika belum ada style left, kita asumsikan dia ada di kanan default
+            let currentX = parseFloat(btn.style.left);
+            let currentY = parseFloat(btn.style.top);
+            
+            // Jika undefined (posisi awal), set manual ke posisi default kanan
+            if (isNaN(currentX)) currentX = maxW; 
+            if (isNaN(currentY)) currentY = 20;
+
+            let newX, newY;
+            let attempts = 0;
+
+            // --- LOGIKA "JAUH" ---
+            // Ulangi pengacakan posisi SAMPAI jaraknya cukup jauh dari posisi sekarang
+            do {
+                newX = Math.floor(Math.random() * (maxW - minX)) + minX;
+                newY = Math.floor(Math.random() * maxH);
+                
+                attempts++;
+                // Batasi looping agar tidak crash browser (max 50 kali coba)
+                if (attempts > 50) break; 
+
+            } while (
+                // Cek Jarak: Kalau selisih posisi X < 50px DAN selisih Y < 50px, cari lagi!
+                Math.abs(newX - currentX) < 50 && Math.abs(newY - currentY) < 50
+            );
+
+            btn.style.right = 'auto'; 
+            btn.style.left = newX + 'px';
+            btn.style.top = newY + 'px';
+        }
+
+        function showFinalResult(isAccepted) {
+            btnGroup.classList.add('buttons-locked');
+
+            if (isAccepted) {
+                finalText.innerText = "Mohon jangan di anggap serius,karena ini cuma tes web gua doang,sengaja di buat gitu biar di klik,Minat? langsung dm aja";
+                popup.classList.add('show-popup');
+            } else {
+                finalText.innerText = "Terima kasih sudah melakukan tes website ini,walaupun masih ada kekurangan";
+                document.querySelector('.final-content h1').style.color = '#333';
+                popup.classList.add('show-popup');
+            }
+        }
+
+        function closePopup() {
+            popup.classList.remove('show-popup');
+        }
+
+        init();
+
+    </script>
+</body>
+</html>
